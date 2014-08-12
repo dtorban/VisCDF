@@ -41,7 +41,6 @@ void FEAPart::loadMesh(float* nodes, int* elements) {
 
 std::vector<std::string> FEAPart::getVariables(int resultSet) {
 	std::vector<std::string> variables;
-	FEAFrameRef frame = getFrames(resultSet)[0];
 	std::vector<viscdfcore::VariableRef> vars = getFrames(resultSet)[0]->_frameGroup->getGroup("nodalData")->getVariables();
 	for (int f = 0; f < vars.size(); f++)
 	{

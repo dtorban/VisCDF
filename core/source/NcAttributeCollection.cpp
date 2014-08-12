@@ -38,7 +38,7 @@ std::string NcAttributeCollection::getText(const std::string& key) {
 
 	val[len] = '\0';
 	std::string str = std::string(val);
-	delete val;
+	delete [] val;
 	return str;
 }
 

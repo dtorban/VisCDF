@@ -74,7 +74,7 @@ void listVars(IVcGroup::IVcGroupRef group, int level)
 			}
 			cout << endl;
 
-			delete data;
+			delete [] data;
 		}
 	}
 }
@@ -162,7 +162,7 @@ main()
 		float *timeMesh = new float[numNodes * 3];
 
 		frames[10]->getDisplacement(displacement);
-		frames[10]->calcDisplacement(timeMesh, displacement, numNodes);
+		frames[10]->calcDisplacement(timeMesh, nodes, numNodes);
 
 		for (int i = 0; i < 2; i++)
 		{
