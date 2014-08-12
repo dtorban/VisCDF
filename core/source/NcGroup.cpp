@@ -17,7 +17,6 @@
 #include "netcdf/NcVariable.h"
 #include <map>
 #include "memory/CountedPtr.h"
-#include <iostream>
 
 namespace viscdfcore {
 
@@ -28,27 +27,24 @@ NcGroup::NcGroup(int ncid, std::string name) : _atts(ncid) {
 	int res;
 	if ((res = nc_inq(_ncid, &_ndims_in, &_nvars_in, &_ngatts_in, &_unlimdimid_in)))
 		ERR(res);
+	
+	int *dimids = new int[NC_MAX_DIMS];
 
-	if (_ndims_in > 0)
+	if ((res = nc_inq_dimids(_ncid, &_ndims_in, dimids, 1)))
+			ERR(res);
+
+	for (int f = 0; f < _ndims_in; f++)
 	{
-		int *dimids = new int[_ndims_in];
+		size_t len;
+		char name[32];
 
-		if ((res = nc_inq_dimids(_ncid, &_ndims_in, dimids, 1)))
+		if ((res = nc_inq_dim(_ncid, dimids[f], name, &len)))
 				ERR(res);
 
-		for (int f = 0; f < _ndims_in; f++)
-		{
-			size_t len;
-			char name[32];
-
-			if ((res = nc_inq_dim(_ncid, dimids[f], name, &len)))
-					ERR(res);
-
-			_dims.push_back(NcDimension(dimids[f], std::string(name), len));
-		}
-		
-		delete dimids;
+		_dims.push_back(NcDimension(dimids[f], std::string(name), len));
 	}
+		
+	delete [] dimids;
 
 	int *varids = new int[_nvars_in];
 
@@ -106,7 +102,7 @@ std::string NcGroup::getName()
 	}
 
 	int res;
-	char grpName[32];
+	char grpName[MAX_NC_NAME+1];
 	if ((res = nc_inq_grpname(_ncid, grpName)))
 		ERR(res);
 	return std::string(grpName);

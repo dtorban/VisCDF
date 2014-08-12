@@ -12,7 +12,6 @@
  */
 
 #include "FEAPart.h"
-#include<iostream>
 
 namespace vcdf_fea {
 
@@ -42,11 +41,8 @@ void FEAPart::loadMesh(float* nodes, int* elements) {
 
 std::vector<std::string> FEAPart::getVariables(int resultSet) {
 	std::vector<std::string> variables;
-	std::cout << "Var22: " << std::endl;
 	FEAFrameRef frame = getFrames(resultSet)[0];
-	std::cout << "Var22.5: " << std::endl;
 	std::vector<viscdfcore::VariableRef> vars = getFrames(resultSet)[0]->_frameGroup->getGroup("nodalData")->getVariables();
-	std::cout << "Var23: " << std::endl;
 	for (int f = 0; f < vars.size(); f++)
 	{
 		if (vars[f]->getDimensions().size() == 1)
@@ -60,21 +56,17 @@ std::vector<std::string> FEAPart::getVariables(int resultSet) {
 std::vector<FEAFrameRef> FEAPart::getFrames(int resultSet) {
 	std::string name = getName();
 	std::vector<viscdfcore::IVcGroup::IVcGroupRef> groups = _resultGroup->getGroups()[resultSet]->getGroups();
-	std::cout << groups.size() << std::endl;
 	std::vector<FEAFrameRef> frameGroups;
 	for (int f = 0; f < groups.size(); f++)
 	{
 		if(groups[f]->getName().find("frame_") != std::string::npos)
 		{
-			std::cout << groups[f]->getName() << std::endl;
-			float stepTime[20000];
-			std::cout << groups[f]->getVariable("stepTime")->getName() << std::endl;
-			groups[f]->getVariable("stepTime")->getData(&stepTime[0]);
-			std::cout << "hi" << std::endl;
-			frameGroups.push_back(new FEAFrame(groups[f]->getGroup(name), stepTime[0]));
+			float stepTime = 0;
+			groups[f]->getVariable("stepTime")->getData(&stepTime);
+			frameGroups.push_back(new FEAFrame(groups[f]->getGroup(name), stepTime));
 		}
 	}
-	std::cout << frameGroups.size() << std::endl;
+
 	return frameGroups;
 }
 

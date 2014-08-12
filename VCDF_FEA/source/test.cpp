@@ -85,6 +85,7 @@ void listGroups(IVcGroup::IVcGroupRef group, int level)
 	{
 		cout << "\t";
 	}
+	cout << group->getName() << endl;
 	listDims(group, level);
 	listVars(group, level);
 	
@@ -93,27 +94,6 @@ void listGroups(IVcGroup::IVcGroupRef group, int level)
 	{
 		listGroups(groups[f], level + 1);
 	}
-}
-
-template <typename T> T** allocate2d(int sizeX, int sizeY)
-{
-	T** arr = new T*[sizeX];
-	for(int i = 0; i < sizeX; i++)
-	{
-		arr[i] = new T[sizeY];
-	}
-
-	return arr;
-}
-
-template <typename T> void deallocate2d(T** arr, int sizeX)
-{
-	for(int i = 0; i < sizeX; i++)
-	{
-		delete [] arr[i];
-	}
-
-	delete [] arr;
 }
 
 int
@@ -146,20 +126,18 @@ main()
 		cout << frames.size() << " ";
 		cout << endl;
 
-		float **nodes = allocate2d<float>(numNodes, 3);
-		int **elements = allocate2d<int>(numElements, connectivity);
+		float *nodes = new float[numNodes * 3];
+		int *elements = new int[numElements * connectivity];
 
-		parts[f]->loadMesh(&nodes[0][0], &elements[0][0]);
+		parts[f]->loadMesh(nodes, elements);
 
 		for (int i = 0; i < 10; i++)
 		{
-			cout << nodes[i][0] << " " << nodes[i][1] << " " << nodes[i][2] << endl;
-			cout << elements[i][0] << " " << elements[i][1] << " " << elements[i][2] << endl;
+			cout << nodes[i*3 + 0] << " " << nodes[i*3 + 1] << " " << nodes[i*3 + 2] << endl;
+			cout << elements[i*8 + 0] << " " << elements[i*8 + 1] << " " << elements[i*8 + 2] << endl;
 		}
-		cout << "Var: " << endl;
 
 		vector<string> variables = parts[f]->getVariables(0);
-		cout << "Va2r: " << endl;
 
 		float *var = new float[numNodes];
 
@@ -180,30 +158,24 @@ main()
 			//cout << "Time: " << frames[i]->getStepTime() << endl;
 		}
 
-		cout << "test1" << endl;
+		float *displacement = new float[numNodes * 3];
+		float *timeMesh = new float[numNodes * 3];
 
-		float **displacement = allocate2d<float>(numNodes, 3);
-		float **timeMesh = allocate2d<float>(numNodes, 3);
-		
-		cout << "test3" << endl;
-
-		frames[10]->getDisplacement(&displacement[0][0]);
-		frames[10]->calcDisplacement(timeMesh, nodes, numNodes);
-		
-		cout << "test4" << endl;
+		frames[10]->getDisplacement(displacement);
+		frames[10]->calcDisplacement(timeMesh, displacement, numNodes);
 
 		for (int i = 0; i < 2; i++)
 		{
-			cout << "n " << nodes[i][0] << " " << nodes[i][1] << " " << nodes[i][2] << endl;
-			cout << "d " << displacement[i][0] << " " << displacement[i][1] << " " << displacement[i][2] << endl;
-			cout << "t " << timeMesh[i][0] << " " << timeMesh[i][1] << " " << timeMesh[i][2] << endl;
+			cout << "n " << nodes[i*3 + 0] << " " << nodes[i*3 + 1] << " " << nodes[i*3 + 2] << endl;
+			cout << "d " << displacement[i*3 + 0] << " " << displacement[i*3 + 1] << " " << displacement[i*3 + 2] << endl;
+			cout << "t " << timeMesh[i*3 + 0] << " " << timeMesh[i*3 + 1] << " " << timeMesh[i*3 + 2] << endl;
 		}
 
-		deallocate2d(nodes, numNodes);
-		deallocate2d(elements, numElements);
-		delete var;
-		deallocate2d(displacement, numNodes);
-		deallocate2d(timeMesh, numNodes);
+		delete [] nodes;
+		delete [] elements;
+		delete [] var;
+		delete [] displacement;
+		delete [] timeMesh;
 	}
 
    cout << "Success!" << endl;

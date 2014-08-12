@@ -32,15 +32,15 @@ void FEAFrame::getDisplacement(float *displacement) {
 	getFrameVariable("U")->getData(displacement);
 }
 
-void FEAFrame::calcDisplacement(float** newNodes, float** nodes, int numNodes)
+void FEAFrame::calcDisplacement(float* newNodes, float* nodes, int numNodes)
 {
-	getDisplacement(&newNodes[0][0]);
+	getDisplacement(newNodes);
 
 	for (int f = 0; f < numNodes; f++)
 	{
 		for (int i = 0; i < 3; i++)
 		{
-			newNodes[f][i] += nodes[f][i];
+			newNodes[f*3 + i] += nodes[f*3 + i];
 		}
 	}
 }
