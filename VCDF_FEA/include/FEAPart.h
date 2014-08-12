@@ -43,11 +43,11 @@ public:
 	 *  	Nodes should be allocated: float node[NUM_NODES][3]
 	 *  	Elements should be allocated: int elements[NUM_ELEMENTS][CONNECTIVITY]
 	 *  	Here is an example of how to call loadMesh:
-	 *  		float node[part.getNumNodes()][3];
-	 *  		int element[part.getNumElements()][part.getConnectivity()];
-	 *			part.loadMesh(nodes, &elements[0][0]);
+	 *  		float node[numNodes][3];
+	 *  		int element[numElements][connectivity];
+	 *			part.loadMesh(&nodes[0][0], &elements[0][0]);
 	 */
-	void loadMesh(float nodes[][3], int *elements);
+	void loadMesh(float* nodes, int* elements);
 private:
 	FEAPart(viscdfcore::IVcGroup::IVcGroupRef meshGroup, viscdfcore::IVcGroup::IVcGroupRef resultGroup) : _meshGroup(meshGroup), _resultGroup(resultGroup) {}
 

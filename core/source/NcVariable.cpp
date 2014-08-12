@@ -12,6 +12,7 @@
  */
 
 #include "netcdf/NcVariable.h"
+#include <iostream>
 
 namespace viscdfcore {
 
@@ -50,15 +51,19 @@ std::string NcVariable::getName() {
 }
 
 void NcVariable::getData(float* data) {
+	std::cout << "getData" << _ncid << " " << _varid << " " << _dims[0].getName() << " " << _dims[0].getLength() << std::endl;
 	int res;
 	if ((res = nc_get_var_float(_ncid, _varid, data)))
 		ERR(res);
+	std::cout << "getData2" << std::endl;
 }
 
 void NcVariable::getData(int* data) {
+	std::cout << "getData" << std::endl;
 	int res;
 	if ((res = nc_get_var_int(_ncid, _varid, data)))
 		ERR(res);
+	std::cout << "getData2" << std::endl;
 }
 
 }

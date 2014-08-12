@@ -17,6 +17,7 @@
 #include "netcdf/NcVariable.h"
 #include <map>
 #include "memory/CountedPtr.h"
+#include <iostream>
 
 namespace viscdfcore {
 
@@ -28,23 +29,28 @@ NcGroup::NcGroup(int ncid, std::string name) : _atts(ncid) {
 	if ((res = nc_inq(_ncid, &_ndims_in, &_nvars_in, &_ngatts_in, &_unlimdimid_in)))
 		ERR(res);
 
-	int dimids[_ndims_in];
-
-	if ((res = nc_inq_dimids(_ncid, &_ndims_in, dimids, 1)))
-			ERR(res);
-
-	for (int f = 0; f < _ndims_in; f++)
+	if (_ndims_in > 0)
 	{
-		size_t len;
-		char name[32];
+		int *dimids = new int[_ndims_in];
 
-		if ((res = nc_inq_dim(_ncid, dimids[f], name, &len)))
+		if ((res = nc_inq_dimids(_ncid, &_ndims_in, dimids, 1)))
 				ERR(res);
 
-		_dims.push_back(NcDimension(dimids[f], std::string(name), len));
+		for (int f = 0; f < _ndims_in; f++)
+		{
+			size_t len;
+			char name[32];
+
+			if ((res = nc_inq_dim(_ncid, dimids[f], name, &len)))
+					ERR(res);
+
+			_dims.push_back(NcDimension(dimids[f], std::string(name), len));
+		}
+		
+		delete dimids;
 	}
 
-	int varids[_nvars_in];
+	int *varids = new int[_nvars_in];
 
 	if ((res = nc_inq_varids(_ncid, &_nvars_in, varids)))
 			ERR(res);
@@ -53,6 +59,8 @@ NcGroup::NcGroup(int ncid, std::string name) : _atts(ncid) {
 	{
 		_vars.push_back(new NcVariable(ncid, varids[f], _dims));
 	}
+
+	delete varids;
 }
 
 NcGroup::~NcGroup() {

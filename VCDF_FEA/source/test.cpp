@@ -66,13 +66,15 @@ void listVars(IVcGroup::IVcGroupRef group, int level)
 
 		if (vars[f]->getName() == "MAGNITUDE2")
 		{
-			float data[vars[f]->getDimensions()[0].getLength()];
+			float *data = new float[vars[f]->getDimensions()[0].getLength()];
 			vars[f]->getData(&data[0]);
 			for (int x = 0; x < vars[f]->getDimensions()[0].getLength(); x++)
 			{
 				cout << data[x] << " ";
 			}
 			cout << endl;
+
+			delete data;
 		}
 	}
 }
@@ -83,14 +85,35 @@ void listGroups(IVcGroup::IVcGroupRef group, int level)
 	{
 		cout << "\t";
 	}
-	cout << group->getName() << endl;
 	listDims(group, level);
 	listVars(group, level);
+	
 	vector<IVcGroup::IVcGroupRef> groups = group->getGroups();
 	for (int f = 0; f < groups.size(); f++)
 	{
 		listGroups(groups[f], level + 1);
 	}
+}
+
+template <typename T> T** allocate2d(int sizeX, int sizeY)
+{
+	T** arr = new T*[sizeX];
+	for(int i = 0; i < sizeX; i++)
+	{
+		arr[i] = new T[sizeY];
+	}
+
+	return arr;
+}
+
+template <typename T> void deallocate2d(T** arr, int sizeX)
+{
+	for(int i = 0; i < sizeX; i++)
+	{
+		delete [] arr[i];
+	}
+
+	delete [] arr;
 }
 
 int
@@ -123,20 +146,22 @@ main()
 		cout << frames.size() << " ";
 		cout << endl;
 
-		float nodes[numNodes][3];
-		int elements[numElements][connectivity];
+		float **nodes = allocate2d<float>(numNodes, 3);
+		int **elements = allocate2d<int>(numElements, connectivity);
 
-		parts[f]->loadMesh(nodes, &elements[0][0]);
+		parts[f]->loadMesh(&nodes[0][0], &elements[0][0]);
 
 		for (int i = 0; i < 10; i++)
 		{
 			cout << nodes[i][0] << " " << nodes[i][1] << " " << nodes[i][2] << endl;
 			cout << elements[i][0] << " " << elements[i][1] << " " << elements[i][2] << endl;
 		}
+		cout << "Var: " << endl;
 
 		vector<string> variables = parts[f]->getVariables(0);
+		cout << "Va2r: " << endl;
 
-		float var[numNodes];
+		float *var = new float[numNodes];
 
 		for (int i = 0; i < variables.size(); i++)
 		{
@@ -155,11 +180,17 @@ main()
 			//cout << "Time: " << frames[i]->getStepTime() << endl;
 		}
 
-		float displacement[numNodes][3];
-		float timeMesh[numNodes][3];
+		cout << "test1" << endl;
 
-		frames[10]->getDisplacement(displacement);
+		float **displacement = allocate2d<float>(numNodes, 3);
+		float **timeMesh = allocate2d<float>(numNodes, 3);
+		
+		cout << "test3" << endl;
+
+		frames[10]->getDisplacement(&displacement[0][0]);
 		frames[10]->calcDisplacement(timeMesh, nodes, numNodes);
+		
+		cout << "test4" << endl;
 
 		for (int i = 0; i < 2; i++)
 		{
@@ -167,6 +198,12 @@ main()
 			cout << "d " << displacement[i][0] << " " << displacement[i][1] << " " << displacement[i][2] << endl;
 			cout << "t " << timeMesh[i][0] << " " << timeMesh[i][1] << " " << timeMesh[i][2] << endl;
 		}
+
+		deallocate2d(nodes, numNodes);
+		deallocate2d(elements, numElements);
+		delete var;
+		deallocate2d(displacement, numNodes);
+		deallocate2d(timeMesh, numNodes);
 	}
 
    cout << "Success!" << endl;
